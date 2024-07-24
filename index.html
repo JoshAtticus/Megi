@@ -32,6 +32,9 @@
                 <label for="color-input">Message Color:</label>
                 <input type="color" id="color-input" value="#ef000a">
             </div>
+            <small>Heads up, we collect your IP address when you use Megi! Your IP is never shared and only used for security purposes.</small>
+            <br>
+            <p></p>
             <button class="btn btn-primary" onclick="setUserSettings()">Save</button>
             <button class="btn btn-secondary" onclick="closeSettings()">Close</button>
             <button class="btn btn-secondary" onclick="toggleAdminMode()">Toggle Admin Mode</button>
@@ -65,7 +68,7 @@
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
         // Flag to force use of the public API, off by default, won't affect public site if left on by accident
-        const forcePublicApi = false;
+        const forcePublicApi = true;
 
         // Development and public API URLs
         const devApiUrl = 'http://127.0.0.1:5023';
