@@ -41,7 +41,7 @@ if os.path.exists('ip_logs.json'):
     with open('ip_logs.json', 'r') as f:
         ip_logs = json.load(f)
 else:
-    ip_logs = []
+    ip_logs = {}
 
 if os.path.exists('ip_bans.json'):
     with open('ip_bans.json', 'r') as f:
@@ -51,17 +51,20 @@ else:
 
 def save_ip_logs():
     with open('ip_logs.json', 'w') as f:
-        json.dump(ip_logs, f)
+        json.dump(ip_logs, f, indent=4)
 
 def save_ip_bans():
     with open('ip_bans.json', 'w') as f:
-        json.dump(ip_bans, f)
+        json.dump(ip_bans, f, indent=4)
 
 def get_ip():
     return request.headers.get('CF-Connecting-IP', request.remote_addr)
 
-def log_ip(ip):
-    ip_logs.append({'ip': ip, 'timestamp': datetime.now().isoformat()})
+def log_ip(ip, username):
+    if ip not in ip_logs:
+        ip_logs[ip] = []
+    if username not in ip_logs[ip]:
+        ip_logs[ip].append(username)
     save_ip_logs()
 
 def is_ip_banned(ip):
@@ -102,8 +105,7 @@ def delete_message(message_id):
 def block_banned_ips():
     ip = get_ip()
     if is_ip_banned(ip):
-        return jsonify({'error': 'Your IP is banned. Please send an email to megi@atticat.tech if you think this is a mistake.'}), 403
-    log_ip(ip)
+        return jsonify({'error': 'Your IP is banned.'}), 403
 
 @app.route('/api/messages', methods=['GET'])
 def get_messages():
@@ -115,7 +117,14 @@ def get_messages():
 
 @app.route('/api/messages', methods=['POST'])
 def add_message():
+    ip = get_ip()
     name = request.json['name'][:20]  # Limit name to 20 characters
+
+    if is_ip_banned(ip):
+        return jsonify({'error': 'Your IP is banned.'}), 403
+    
+    log_ip(ip, name)
+    
     if profanity.contains_profanity(name):
         return jsonify({'error': 'Name contains profanity.'}), 400
 
@@ -154,6 +163,7 @@ def delete_message_route(message_id):
 @app.route('/api/presence', methods=['POST'])
 def update_presence():
     username = request.json.get('username')
+    ip = get_ip()
     
     # Check for profanity
     if profanity.contains_profanity(username):
@@ -165,6 +175,8 @@ def update_presence():
     
     if not username:
         return jsonify({'error': 'Username is required.'}), 400
+    
+    log_ip(ip, username)
     
     presence[username] = datetime.now()
     return jsonify({'message': 'Presence updated successfully.'}), 200
