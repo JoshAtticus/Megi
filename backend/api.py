@@ -8,6 +8,7 @@ from flask_socketio import SocketIO, emit
 from better_profanity import profanity
 from datetime import datetime, timedelta
 import re
+import json
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -35,6 +36,47 @@ CREATE INDEX IF NOT EXISTS messages_id_idx ON messages(id)
 ''')
 conn.commit()
 
+# Load or initialize IP logs and bans
+if os.path.exists('ip_logs.json'):
+    with open('ip_logs.json', 'r') as f:
+        ip_logs = json.load(f)
+else:
+    ip_logs = []
+
+if os.path.exists('ip_bans.json'):
+    with open('ip_bans.json', 'r') as f:
+        ip_bans = json.load(f)
+else:
+    ip_bans = []
+
+def save_ip_logs():
+    with open('ip_logs.json', 'w') as f:
+        json.dump(ip_logs, f)
+
+def save_ip_bans():
+    with open('ip_bans.json', 'w') as f:
+        json.dump(ip_bans, f)
+
+def get_ip():
+    return request.headers.get('CF-Connecting-IP', request.remote_addr)
+
+def log_ip(ip):
+    ip_logs.append({'ip': ip, 'timestamp': datetime.now().isoformat()})
+    save_ip_logs()
+
+def is_ip_banned(ip):
+    return ip in ip_bans
+
+def ban_ip(ip):
+    if ip not in ip_bans:
+        ip_bans.append(ip)
+        save_ip_bans()
+
+def unban_ip(ip):
+    if ip in ip_bans:
+        ip_bans.remove(ip)
+        save_ip_bans()
+
 def load_messages(start_id=-1):
     if start_id == -1:
         cursor.execute('''
@@ -55,6 +97,13 @@ def save_message(name, content, timestamp, color):
 def delete_message(message_id):
     cursor.execute('DELETE FROM messages WHERE id = ?', (message_id,))
     conn.commit()
+
+@app.before_request
+def block_banned_ips():
+    ip = get_ip()
+    if is_ip_banned(ip):
+        return jsonify({'error': 'Your IP is banned. Please send an email to megi@atticat.tech if you think this is a mistake.'}), 403
+    log_ip(ip)
 
 @app.route('/api/messages', methods=['GET'])
 def get_messages():
