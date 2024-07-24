@@ -241,9 +241,8 @@
 
         function parseMarkdown(text) {
             const rawHtml = text
-                .replace(/_(.*?)_/g, '<u>$1</u>') // underline
-                .replace(/__(.*?)__/g, '<b>$1</b>') // bold
-                .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') // also bold
+                .replace(/__(.*?)__/g, '<u>$1</u>') // underline
+                .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') // bold
                 .replace(/\*(.*?)\*/g, '<em>$1</em>') // italic
                 .replace(/~~(.*?)~~/g, '<del>$1</del>') // strikethrough
                 .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>'); // link
