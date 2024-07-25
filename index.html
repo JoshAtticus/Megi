@@ -32,7 +32,8 @@
                 <label for="color-input">Message Color:</label>
                 <input type="color" id="color-input" value="#ef000a">
             </div>
-            <small>Heads up, we collect your IP address when you use Megi! Your IP is never shared and only used for security purposes.</small>
+            <small>Heads up, we collect your IP address when you use Megi! Your IP is never shared and only used for
+                security purposes.</small>
             <br>
             <p></p>
             <button class="btn btn-primary" onclick="setUserSettings()">Save</button>
@@ -315,8 +316,18 @@
         }
 
         function expandMessageInput() {
-            messageInput.style.height = "40px";
-            messageInput.style.height = (messageInput.scrollHeight) + "px";
+            const messageInput = document.getElementById('message-input'); // Ensure you have the right element
+
+            if (!messageInput) {
+                console.error('Element not found!');
+                return;
+            }
+
+            // Temporarily reset the height to measure the scrollHeight
+            messageInput.style.height = "auto";
+
+            // Set the height to the scrollHeight
+            messageInput.style.height = messageInput.scrollHeight + "px";
         }
 
         function deleteMessage() {
