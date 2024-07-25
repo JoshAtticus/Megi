@@ -250,11 +250,13 @@
                 .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') // bold
                 .replace(/\*(.*?)\*/g, '<em>$1</em>') // italic
                 .replace(/~~(.*?)~~/g, '<del>$1</del>') // strikethrough
-                .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>'); // link
+                .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>') // link
+                .replace(/`([^`]+)`/g, '<code>$1</code>') // inline code
+                // .replace(/```([^]+?)```/g, '<pre><code>$1</code></pre>'); // multiline code block | does not work
 
             // Sanitize the HTML, removing <img> and <script> tags along with other dangerous elements
             const cleanHtml = DOMPurify.sanitize(rawHtml, {
-                ALLOWED_TAGS: ['u', 'b', 'em', 'del', 'a'],
+                ALLOWED_TAGS: ['u', 'b', 'em', 'del', 'a', 'code', 'pre'],
                 ALLOWED_ATTR: ['href']
             });
 
