@@ -4,3 +4,6 @@ messages.json
 messages.db
 ip_logs.json
 ip_bans.json
+
+# macOS
+.DS_Store
